@@ -1,32 +1,42 @@
 import React from 'react';
 import './style.css';
-import algoliasearch from 'algoliasearch';
 import {
   InstantSearch,
   SearchBox,
-  Pagination,
   Configure,
   Hits,
+  Pagination,
   Highlight,
 } from 'react-instantsearch-dom';
-const Typesense = require('typesense');
+import { SearchClient as TypesenseSearchClient } from 'typesense';
 
+import TypesenseInstantSearchAdapter from 'typesense-instantsearch-adapter';
 
-
-const searchClient = algoliasearch(
-  'latency',
-  '6be0576ff61c053d5f9a3225e2a90f76'
-);
+const typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
+  server: {
+    nodes: [
+      {
+        host: 'fkute4jm109ndpzvp-1.a1.typesense.net',
+        port: '443',
+        protocol: 'https',
+      },
+    ],
+    apiKey: 'GZiu8M4qazNPf336UQlv9jfD6x2evuXz',
+  },
+  additionalSearchParameters: {
+    query_by: 'title',
+  },
+});
 
 export default function App() {
   const Hit = ({ hit }) => {
     return (
       <div className="hit">
         <div className="hit-image">
-          <img alt={hit.name} src={`${hit.image}`} />
+          <img alt={hit.authors} src={hit.image_url} />
         </div>
         <div className="hit-content">
-          <div className="hit-price">${hit.price}</div>
+          <div className="hit-price">${hit.title}</div>
           <div className="hit-name">
             <Highlight attribute="name" hit={hit} />
           </div>
@@ -40,11 +50,14 @@ export default function App() {
   return (
     <div>
       <h1>Hello StackBlitz!</h1>
-      <InstantSearch indexName="instant_search" searchClient={searchClient}>
-        <h4>Search Movies</h4>
+      <InstantSearch
+        indexName="books"
+        searchClient={typesenseInstantsearchAdapter.searchClient}
+      >
+        <h4>Search Books</h4>
         <SearchBox autoFocus />
-        <Configure hitsPerPage={2} />
-        <Hits hitComponent={Hit} />
+        <Configure hitsPerPage={5} />
+        <Hits hitComponent={Hit}/>
         <Pagination />
       </InstantSearch>
     </div>
